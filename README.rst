@@ -2,6 +2,8 @@
 desiutil
 ========
 
+This is a fork of the desiutil repo for use with LVM.
+
 Introduction
 ============
 
