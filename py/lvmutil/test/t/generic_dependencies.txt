@@ -1,0 +1,5 @@
+# This is a dummy module file for testing purposes.
+module load astropy
+prereq astropy
+module load lvmutil/1.0.0
+prereq lvmutil/1.0.0
