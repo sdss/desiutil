@@ -7,62 +7,24 @@ Introduction
 
 This document describes the desiInstall process and the logic behind it.
 
+The primary purpose of desiInstall is to install DESI software **at NERSC**.
+Using it to install software at locations other than NERSC is theoretically
+possible, but not supported.
+
 Configuring desiInstall
 =======================
 
 desiInstall has many options, which are best viewed by typing
-``desiInstall -h``.
+``desiInstall --help``.
 
-In addition, it is possible to override certain internal settings of
-the :class:`~desiutil.install.DesiInstall` object using an
-INI-style configuration file, supplying the name of the file with the
-``--configuration`` option.  Here is an example of the contents of such a
-file::
-
-    #
-    # READ ME FIRST
-    #
-    # This file provides an example of how to override certain internal settings
-    # in desiInstall (desiutil.install).  You can copy this file, edit your copy
-    # and supply it to desiInstall with the --configuration option.
-    #
-    #
-    # This section can be used to override built-in names of NERSC hosts.
-    # Specifically, these will override the cross_install_host and
-    # nersc_hosts attributes of the DesiInstall object.
-    #
-    [Cross Install]
-    cross_install_host = cori
-    nersc_hosts = cori,edison,datatran
-    #
-    # This section can be used to append to or override values in the
-    # known_products dictionary in desiutil.install.
-    #
-    [Known Products]
-    my_new_product = https://github.com/me/my_new_product
-    desiutil = https://github.com/you/new_path_to_desiutil
-    #
-    # This section can override details of Module file installation.
-    #
-    [Module Processing]
-    #
-    # nersc_module_dir overrides the Module file install directory for
-    # ALL NERSC hosts.
-    #
-    nersc_module_dir = /project/projectdirs/desi/test/modules
-    #
-    # cori_module_dir overrides the Module file install directory only
-    # on cori.
-    #
-    cori_module_dir = /global/common/software/desi/cori/test/modules
-
-Finally, desiInstall both reads and sets several environment variables.
+In addition, desiInstall both reads and sets several environment variables.
 
 Environment variables that strongly affect the behavior of desiInstall.
 
-:envvar:`DESI_PRODUCT_ROOT`
-    This variable is used to determine the path to DESI software when
-    desiInstall is *not* run at NERSC.
+:envvar:`DESICONDA`
+    This variable contains the path to the `DESI+Anaconda infrastructure`_.
+:envvar:`DESICONDA_VERSION`
+    This variable should contain the version of the `DESI+Anaconda infrastructure`_.
 :envvar:`DESIUTIL`
     This variable contains the path to the installed version of desiutil_.
     It is needed to find the ``etc/desiutil.module`` file.
@@ -120,15 +82,13 @@ Directory Structure Assumed by the Install
 ==========================================
 
 desiInstall is primarily intended to run in a production environment that
-supports Module files.  In practice, this means NERSC, though it can also
-install on any other system that has a Modules infrastructure installed.
+supports Module files, *i.e.* at NERSC.
 
 *desiInstall does not install a Modules infrastructure for you.* You have to
 do this yourself, if your system does not already have this.
 
 For the purposes of this section, we define ``$product_root`` as the
-directory that desiInstall will be writing to.  This directory could be the
-same as :envvar:`DESI_PRODUCT_ROOT`, but for standard NERSC installs it
+directory that desiInstall will be writing to.  For standard NERSC installs it
 defaults to a pre-defined value. ``$product_root`` may contain the following
 directories:
 
@@ -142,7 +102,15 @@ modulefiles/
     file is almost always named ``product/version``.  For example, the
     Module file for desiutil might be ``$product_root/modulefiles/desiutil/1.8.0``.
 
-.. _Anaconda: https://www.continuum.io
+The ``--root`` option can override the built-in default value of ``$product_root``,
+which is useful for testing::
+
+    desiInstall --root $SCRATCH/test_install desispec 0.20.0
+
+In the example above, desispec would be installed in
+``$SCRATCH/test_install/code/desispec/0.20.0``,
+with a corresponding Module file at
+``$SCRATCH/test_install/modulefiles/desispec/0.20.0``
 
 Within a ``$product_root/code/product/version`` directory, you might see the
 following:
@@ -183,6 +151,16 @@ a list of known products, but it is not necessarily complete. desiInstall parses
 the input to determine the base name and base version to install.  At this
 stage desiInstall also determines whether a trunk or branch install has
 been requested.
+
+The internal list of known products can be added to or overridden on the
+command line::
+
+    desiInstall -p new_product:https://github.com/me/new_product new_product 1.2.3
+
+    desiInstall -p desiutil:https://github.com/alternate_repository/desiutil desiutil 1.9.9
+
+The ``-p`` option can be specified multiple times, though in practice, it only
+matters to the product actually being installed.
 
 Product Existence
 -----------------
@@ -231,24 +209,9 @@ Determine Install Directory
 
 The install directory is where the code will live permanently.  If the
 install is taking place at NERSC, the top-level install directory is
-predetermined based on the value of :envvar:`NERSC_HOST`.
+predetermined based on the value of :envvar:`NERSC_HOST`::
 
-edison
-    ``/global/common/software/desi/edison/desiconda/${DESICONDA_VERSION}``
-cori
-    ``/global/common/software/desi/cori/desiconda/${DESICONDA_VERSION}``
-coriknl
-    ``/global/common/software/desi/coriknl/desiconda/${DESICONDA_VERSION}``
-datatran
-    ``/global/common/software/desi/datatran/desiconda/${DESICONDA_VERSION}``
-scigate
-    ``/global/common/software/desi/scigate/desiconda/${DESICONDA_VERSION}``
-
-Note that to support KNL (`Knights Landing`_) versions of desiconda_,
-the ``--knl`` option must be passed to :command:`desiInstall`.
-
-At other locations, the user must set the environment variable
-:envvar:`DESI_PRODUCT_ROOT` to point to the equivalent directory.
+    /global/common/software/desi/${NERSC_HOST}/desiconda/${DESICONDA_VERSION}
 
 The actual install directory is determined by appending ``/code/product/verson``
 to the combining the top-level directory listed above.
@@ -259,7 +222,7 @@ If the install directory already exists, desiInstall will exit, unless the
 desiInstall will set the environment variable :envvar:`INSTALL_DIR` to point to the
 install directory.
 
-.. _`Knights Landing`: http://www.nersc.gov/news-publications/nersc-news/nersc-center-news/2016/nersc-staff-users-readying-for-delivery-of-cori-phase-2-knights-landing-based-system-in-july/
+.. _`DESI+Anaconda infrastructure`: https://github.com/desihub/desiconda
 .. _desiconda: https://github.com/desihub/desiconda
 
 Module Infrastructure
@@ -280,19 +243,15 @@ Load Dependencies
 -----------------
 
 desiInstall will scan the module file identified in the previous stage, and
-will module load any dependencies found in the file.  desiInstall will
-purge modules whose name contains ``-hpcp`` if it detects it is not running
-at NERSC.  Similarly, it will purge modules *not* containing ``-hpcp`` if
-it detects a NERSC environment.
+will module load any dependencies found in the file.
 
 Configure Module File
 ---------------------
 
 desiInstall will scan :envvar:`WORKING_DIR` to determine the details that need
 to be added to the module file.  The final module file will then be written
-into the DESI module directory at NERSC or the module directory associated
-with :envvar:`DESI_PRODUCT_ROOT`.  If ``--default`` is specified on the command
-line, an appropriate .version file will be created.
+into the DESI module directory at NERSC.  If ``--default`` is specified
+on the command line, an appropriate .version file will be created.
 
 Load Module
 -----------
@@ -303,31 +262,19 @@ the environment variables :envvar:`WORKING_DIR` and :envvar:`INSTALL_DIR` exist.
 It will also set :envvar:`PRODUCT_VERSION`, where ``PRODUCT`` will be replaced
 by the actual name of the package, *e.g.*, :envvar:`DESIMODEL_VERSION`.
 
-Download Extra Data
--------------------
-
-If desiInstall detects ``etc/product_data.sh``, where ``product`` should be
-replaced by the actual name of the package, it will download extra data
-not bundled with the code, so that it can be installed in
-:envvar:`INSTALL_DIR` in the next stage.  The script should *only* be used
-with desiInstall and Travis tests.  There are other, better ways to
-install and manipulate data that is bundled *with* the package.
-
-Copy All Files
---------------
-
-The entire contents of :envvar:`WORKING_DIR` will be copied to :envvar:`INSTALL_DIR`.
-If this is a trunk or branch install and a src/ directory is detected,
-desiInstall will attempt to run :command:`make -C src all` in :envvar:`INSTALL_DIR`.
-For trunk or branch installs, no further processing is performed past this
-point.
-
 Create site-packages
 --------------------
 
 If the build-type 'py' is detected, a site-packages directory will be
 created in :envvar:`INSTALL_DIR`.  If necessary, this directory will be
 added to Python's :data:`sys.path`.
+
+Can We Just Copy the Download?
+------------------------------
+
+If the build-type is *only* 'plain', or if a trunk or branch install is
+requested, the downloaded code will be copied to :envvar:`INSTALL_DIR`.
+Further Python or C/C++ install steps described below will be skipped.
 
 Run setup.py
 ------------
@@ -342,12 +289,20 @@ If the build-type 'make' is detected, :command:`make install` will be run in
 :envvar:`WORKING_DIR`.  If the build-type 'src' is detected, :command:`make -C src all`
 will be run in :envvar:`INSTALL_DIR`.
 
-Cross Install
--------------
+Download Extra Data
+-------------------
 
-If the ``--cross-install`` option is specified, and the NERSC environment is
-detected, symlinks will be created to make the package available on all
-NERSC platforms.
+If desiInstall detects ``etc/product_data.sh``, where ``product`` should be
+replaced by the actual name of the package, it will download extra data
+not bundled with the code.  The script should download data *directly* to
+:envvar:`INSTALL_DIR`. The script should *only* be used
+with desiInstall and Travis tests.  Note that here are other, better ways to
+install and manipulate data that is bundled *with* a Python package.
+
+Fix Permissions
+---------------
+
+The script :command:`fix_permissions.sh` will be run on :envvar:`INSTALL_DIR`.
 
 Clean Up
 --------

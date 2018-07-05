@@ -2,10 +2,46 @@
 Change Log
 ==========
 
-1.9.10 (unreleased)
+2.0.0 (planned)
+---------------
+
+* This version will drop support for Python 2.
+
+1.9.12 (unreleased)
 -------------------
 
 * No changes yet.
+
+1.9.11 (2018-05-10)
+-------------------
+
+* Installing extra data happens *after* the main install, to prevent
+  collisions in creating the install directory (Issue `#102`_, PR `#109`_).
+* ``fix_permissions.sh`` ignores the group-write bit (Issue `#108`_, PR `#109`_).
+* Remove support for a :command:`desiInstall` configuration file.  All options
+  are specified on the command-line (Issue `#103`_, PR `#109`_).
+* Update sklearn module to support updates to ``sklearn.mixture.GaussianMixture``
+  (PR `#111`_).
+* Added scatter option to :func:`desiutil.plots.plot_slices`;
+  avoid slow PNG generation for large data samples (PR `#112`_).
+
+.. _`#102`: https://github.com/desihub/desiutil/issues/102
+.. _`#103`: https://github.com/desihub/desiutil/issues/103
+.. _`#108`: https://github.com/desihub/desiutil/issues/108
+.. _`#109`: https://github.com/desihub/desiutil/pull/109
+.. _`#111`: https://github.com/desihub/desiutil/pull/111
+.. _`#112`: https://github.com/desihub/desiutil/pull/112
+
+1.9.10 (2018-03-29)
+-------------------
+
+* Remove support for :command:`desiInstall` in environments other than
+  NERSC (PR `#101`_).
+* Try as best as possible that Python executable scripts are installed with
+  an explicit desiconda version (PR `#105`_).
+
+.. _`#101`: https://github.com/desihub/desiutil/pull/101
+.. _`#105`: https://github.com/desihub/desiutil/pull/105
 
 1.9.9 (2017-12-20)
 ------------------
@@ -39,7 +75,7 @@ Change Log
 * Fixed bugs that could cause bricks to be slightly too big, and that
   incorrectly special-cased the north pole with brick sizes that don't
   evenly divide 180 degrees (PR `#84`_).
-* Adds ``return_grid_data``` option to :func:``desiutil.plots.plot_sky_binned``
+* Adds ``return_grid_data`` option to :func:`desiutil.plots.plot_sky_binned`
   (PR `#85`_).
 * Added tests of :mod:`desiutil.sklearn` (PR `#86`_).
 
