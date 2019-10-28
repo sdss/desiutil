@@ -2,7 +2,7 @@
 desiutil
 ========
 
-This is a fork of the desiutil repo for use with LVM.
+**Deprecated for LVM developement until further notice.**  This is a fork of the desiutil repo for use with LVM.
 
 Introduction
 ============
