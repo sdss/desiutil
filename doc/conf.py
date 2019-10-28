@@ -62,7 +62,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'desiutil'
-copyright = u'2014-2018, DESI Collaboration'
+copyright = u'2014-2019, DESI Collaboration'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -121,7 +121,7 @@ napoleon_include_private_with_doc = True
 # some external dependencies are not met at build time and break the
 # building process.
 autodoc_mock_imports = []
-for missing in ('numpy',):
+for missing in ('numpy', 'astropy'):
     try:
         foo = import_module(missing)
     except ImportError:

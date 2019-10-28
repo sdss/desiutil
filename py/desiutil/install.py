@@ -7,15 +7,13 @@ desiutil.install
 
 This package contains code for installing DESI software products.
 """
-from __future__ import (absolute_import, division,
-                        print_function, unicode_literals)
-# The line above will help with 2to3 support.
 import os
 import sys
 import tarfile
 import re
 import shutil
 import requests
+from io import BytesIO
 from subprocess import Popen, PIPE
 from types import MethodType
 from pkg_resources import resource_filename
@@ -25,19 +23,14 @@ from .modules import (init_modules, configure_module,
                       process_module, default_module)
 from . import __version__ as desiutilVersion
 
-try:
-    # Python 3
-    from io import BytesIO as StringIO
-except ImportError:
-    # Python 2
-    from cStringIO import StringIO
-
 
 known_products = {
     'desiBackup': 'https://github.com/desihub/desiBackup',
     'desidatamodel': 'https://github.com/desihub/desidatamodel',
     'desidithering': 'https://github.com/desihub/desidithering',
     'desietc': 'https://github.com/desihub/desietc',
+    'desici': 'https://github.com/desihub/desici',
+    'desilamps': 'https://github.com/desihub/desilamps',
     'desimodel': 'https://github.com/desihub/desimodel',
     'desimodules': 'https://github.com/desihub/desimodules',
     'desisim': 'https://github.com/desihub/desisim',
@@ -47,22 +40,22 @@ known_products = {
     'desitarget': 'https://github.com/desihub/desitarget',
     'desitemplate': 'https://github.com/desihub/desitemplate',
     'desitemplate_cpp': 'https://github.com/desihub/desitemplate_cpp',
+    'desitest': 'https://github.com/desihub/desitest',
+    'desitransfer': 'https://github.com/desihub/desitransfer',
     'desitree': 'https://github.com/desihub/desitree',
     'desiutil': 'https://github.com/desihub/desiutil',
     'fiberassign': 'https://github.com/desihub/fiberassign',
-    'fiberassign_sqlite': 'https://github.com/desihub/fiberassign_sqlite',
     'gcr-catalogs': 'https://github.com/desihub/gcr-catalogs',
     'imaginglss': 'https://github.com/desihub/imaginglss',
-    'qlf': 'https://github.com/desihub/qlf',
-    'qlf-ui': 'https://github.com/desihub/qlf-ui',
     'quicksurvey_example': 'https://github.com/desihub/quicksurvey_example',
-    'redmonster': 'https://github.com/desihub/redmonster',
     'redrock': 'https://github.com/desihub/redrock',
     'redrock-templates': 'https://github.com/desihub/redrock-templates',
     'specex': 'https://github.com/desihub/specex',
     'specsim': 'https://github.com/desihub/specsim',
     'specter': 'https://github.com/desihub/specter',
     'surveysim': 'https://github.com/desihub/surveysim',
+    'teststand': 'https://github.com/desihub/teststand',
+    'tilepicker': 'https://github.com/desihub/tilepicker',
     'two_percent_DESI': 'https://github.com/desihub/two_percent_DESI',
     'simqso': 'https://github.com/imcgreer/simqso',
     'speclite': 'https://github.com/dkirkby/speclite',
@@ -475,7 +468,7 @@ class DesiInstall(object):
                         self.log.critical(message)
                         raise DesiInstallException(message)
                     try:
-                        tgz = StringIO(r.content)
+                        tgz = BytesIO(r.content)
                         tf = tarfile.open(fileobj=tgz, mode='r:gz')
                         tf.extractall()
                         tf.close()
@@ -716,6 +709,10 @@ class DesiInstall(object):
                                module_directory)
                 mod = process_module(self.module_file, self.module_keywords,
                                      module_directory)
+                # Remove write permission to avoid accidental changes
+                outfile = os.path.join(module_directory,
+                                       self.module_keywords['name'],
+                                       self.module_keywords['version'])
             except OSError as ose:
                 self.log.critical(ose.strerror)
                 raise DesiInstallException(ose.strerror)
@@ -724,6 +721,7 @@ class DesiInstall(object):
                                module_directory)
                 dot_version = default_module(self.module_keywords,
                                              module_directory)
+
         return mod
 
     def prepare_environment(self):
@@ -945,6 +943,20 @@ class DesiInstall(object):
         out, err = proc.communicate()
         status = proc.returncode
         self.log.debug(out)
+
+        # Remove write permission to avoid accidental changes
+        if self.is_trunk or self.is_branch:
+            chmod_mode = 'g-w,o-w'
+        else:
+            chmod_mode = 'a-w'
+        command = ['chmod', '-R', chmod_mode, self.install_dir]
+        self.log.debug(' '.join(command))
+        proc = Popen(command, universal_newlines=True,
+                     stdout=PIPE, stderr=PIPE)
+        out, err = proc.communicate()
+        chmod_status = proc.returncode
+        self.log.debug(out)
+
         return status
 
     def cleanup(self):

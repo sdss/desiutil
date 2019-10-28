@@ -2,15 +2,71 @@
 Change Log
 ==========
 
-2.0.0 (planned)
----------------
-
-* This version will drop support for Python 2.
-
-1.9.12 (unreleased)
--------------------
+2.0.2 (unreleased)
+------------------
 
 * No changes yet.
+
+2.0.1 (2019-09-24)
+------------------
+
+* Updated to latest `ReadTheDocs configuration`_; standardized
+  some docstrings for better appearance (PR `#136`_).
+* No code changes.
+
+.. _`ReadTheDocs configuration`: https://docs.readthedocs.io/en/stable/config-file/v2.html
+.. _`#136`: https://github.com/desihub/desiutil/pull/136
+
+2.0.0 (2019-09-15)
+------------------
+
+* **This version does not support Python 2.**
+* No significant API changes, however.
+
+1.9.16 (2019-08-09)
+-------------------
+
+* Add support for auto-generating API documentation via
+  :command:`python setup.py api` (PR `#131`_).
+* Fix basemap plot tests by using unique axes (PR `#135`_).
+
+.. _`#131`: https://github.com/desihub/desiutil/pull/131
+.. _`#135`: https://github.com/desihub/desiutil/pull/135
+
+1.9.15 (2018-12-14)
+-------------------
+
+* Add :func:`desiutil.dust.ext_odonnell` and :func:`desiutil.dust.ext_ccm`
+  originally from desispec (PR `#128`_).
+* Update permissions set by :command:`fix_permissions.sh` (PR `#126`_).
+* Set read-only permissions on all Module files, and unlock them as needed (PR `#125`_).
+* Draw ecliptic in all-sky plots (PR `#124`_).
+
+.. _`#128`: https://github.com/desihub/desiutil/pull/128
+.. _`#126`: https://github.com/desihub/desiutil/pull/126
+.. _`#125`: https://github.com/desihub/desiutil/pull/125
+.. _`#124`: https://github.com/desihub/desiutil/pull/124
+
+1.9.14 (2018-10-05)
+-------------------
+
+* Restrict write access on software installed with :command:`desiInstall` (PR `#122`_).
+
+.. _`#122`: https://github.com/desihub/desiutil/pull/122
+
+1.9.13 (2018-09-06)
+-------------------
+
+* Add ``/maps`` to the default dust directory (PR `#119`_).
+
+.. _`#119`: https://github.com/desihub/desiutil/pull/119
+
+1.9.12 (2018-09-05)
+-------------------
+
+* Port the dust map code from desitarget to desiutil (PR `#116`_).
+
+.. _`#116`: https://github.com/desihub/desiutil/pull/116
 
 1.9.11 (2018-05-10)
 -------------------

@@ -19,9 +19,6 @@ info from input targeting, not recalculating brick locations and names.
 Note that this code was originally in desispec_, so earlier commit information
 is in the desispec_ repository.
 """
-
-from __future__ import absolute_import, division, print_function
-
 import numpy as np
 
 
@@ -32,10 +29,6 @@ class Bricks(object):
     ----------
     bricksize : :class:`float`, optional
         Brick size in degrees.  Default 0.25 degrees.
-
-    Attributes
-    ----------
-    bricksize
     """
     def __init__(self, bricksize=0.25):
         # Brick row centers and edges

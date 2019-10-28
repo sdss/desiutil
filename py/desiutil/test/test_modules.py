@@ -2,9 +2,6 @@
 # -*- coding: utf-8 -*-
 """Test desiutil.modules.
 """
-from __future__ import (absolute_import, division,
-                        print_function, unicode_literals)
-# The line above will help with 2to3 support.
 import unittest
 from stat import S_IXUSR
 from types import MethodType
@@ -12,6 +9,8 @@ from os import chmod, environ, mkdir, pathsep, remove, rmdir
 from os.path import dirname, exists, isdir, join
 from sys import version_info
 from shutil import rmtree
+from tempfile import mkdtemp
+from pkg_resources import resource_filename
 from ..modules import (init_modules, configure_module, process_module,
                        default_module)
 
@@ -23,7 +22,7 @@ class TestModules(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Data directory
-        cls.data_dir = join(dirname(__file__), 't')
+        cls.data_dir = mkdtemp()
         cls.bin_dir = join(cls.data_dir, 'libexec')
         cls.orig_env_cache = dict()
         cls.env_cache = dict()
@@ -56,7 +55,7 @@ class TestModules(unittest.TestCase):
                 del environ[e]
             else:
                 environ[e] = cls.orig_env_cache[e]
-        rmtree(cls.bin_dir)
+        rmtree(cls.data_dir)
 
     def cache_env(self, envs):
         """Store existing environment variables in a cache and delete them.
@@ -227,7 +226,7 @@ class TestModules(unittest.TestCase):
     def test_process_module(self):
         """Test processing of module file templates.
         """
-        module_file = join(self.data_dir, 'test.module')
+        module_file = resource_filename('desiutil.test', 't/test.module')
         module_keywords = {'name': 'foo', 'version': 'bar'}
         process_module(module_file, module_keywords, self.data_dir)
         self.assertTrue(isdir(join(self.data_dir, 'foo')))
